@@ -1,0 +1,52 @@
+name: certification
+on:
+  workflow_call:
+    inputs:
+      ansible-core-version:
+        description: >-
+          ansible-core version to use for build-import and lint jobs
+          (e.g. 2.16.0). Sanity tests use a fixed matrix of ansible-core
+          stable branches and are not affected by this input.
+        required: false
+        default: "2.16.0"
+        type: string
+      origin-python-version:
+        description: >-
+          Python version for the GitHub Actions runner environment
+          (e.g. "3.12"). Downstream Execution Environments use Python 3.12.
+          It is not recommended to change this input.
+        required: false
+        default: "3.12"
+        type: string
+      collection-root:
+        description: >-
+          Relative path to the collection root in the repository.
+          This input should only be used when the collection is
+          in a non standard location (not at the root of the
+          repository).
+        default: "."
+        type: string
+      automation-hub:
+        type: boolean
+        description: >-
+          Configure Red Hat Ansible Automation Hub as a Galaxy server
+          for ansible-galaxy to use when installing collections.
+          The 'AH_TOKEN' secret must be provided when using this input.
+        default: false
+    secrets:
+      AH_TOKEN:
+        description: >-
+          Token used to authenticate with Red Hat Ansible Automation Hub.
+          Use the 'AH_TOKEN' secret when the automation-hub input boolean is true.
+        required: false
+
+jobs:
+  certification:
+    uses: ansible-collections/partner-certification-checker/.github/workflows/certification-reusable.yml@v4.0.0 # zizmor: ignore[unpinned-uses]
+    with:
+      ansible-core-version: ${{ inputs.ansible-core-version }}
+      origin-python-version: ${{ inputs.origin-python-version }}
+      collection-root: ${{ inputs.collection-root }}
+      automation-hub: ${{ inputs.automation-hub }}
+    secrets:
+      AH_TOKEN: ${{ secrets.AH_TOKEN }}
